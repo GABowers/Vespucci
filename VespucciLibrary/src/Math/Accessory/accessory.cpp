@@ -17,7 +17,9 @@
     You should have received a copy of the GNU General Public License
     along with Vespucci.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
-#include <Math/Accessory/accessory.h>
+#include "Math/Accessory/accessory.h"
+#include <climits>
+#include "Math/Accessory/distancemetricwrapper.h"
 
 ///
 /// \brief Vespucci::Math::LocalMaximum
@@ -219,7 +221,6 @@ arma::mat Vespucci::Math::orth(arma::mat X)
     }
     else{
         std::cerr << "orth: no basis found" << std::endl;
-        //cout << "end orth" << endl;
         return arma::zeros(X.n_rows, X.n_cols);
     }
 }
@@ -951,4 +952,79 @@ arma::cx_mat Vespucci::Math::cx_zeros(arma::uword m, arma::uword n)
 arma::cx_vec Vespucci::Math::cx_zeros(arma::uword n)
 {
     return arma::cx_vec(arma::zeros(n), arma::zeros(n));
+}
+
+///
+/// \brief Vespucci::Math::ClosestIndex
+/// \param value
+/// \param vector
+/// \return
+/// Find the index of value in vector closest to the specified value
+arma::uword Vespucci::Math::ClosestIndex(double value, const arma::vec &vector)
+{
+    double delta = std::abs(vector(1) - vector(0)); //assumes monotonic to some degree of precision
+    arma::uvec indices = arma::find(((value-delta) <= vector) && (vector <= (value+delta)));
+
+
+    arma::uword index;
+    if (indices.n_elem) index = indices(0);
+    else if (!indices.n_elem && value < vector.min()) index = 0;
+    else index = vector.n_elem - 1;
+
+    return index;
+}
+
+///
+/// \brief Vespucci::Math::RepresentativeSpectrum
+/// \param spectra
+/// \param metric Distance metric
+/// \param center
+/// \return
+///
+arma::vec Vespucci::Math::RepresentativeSpectrum(const arma::mat &spectra, arma::uword &index, std::string metric_name, std::string center_type)
+{
+    arma::vec center;
+
+    if (center_type == "centroid")
+        center = arma::mean(spectra, 1);
+    else if (center_type == "medoid")
+        center = arma::median(spectra, 1);
+    else throw std::invalid_argument("center must be either centroid or medoid");
+
+    Vespucci::Math::DistanceMetricWrapper metric(metric_name);
+
+    arma::vec distances(spectra.n_cols);
+
+#ifdef _WIN32
+  #pragma omp parallel for default(none) \
+      shared(spectra, metric, distances)
+   for (intmax_t i = 0; i < (intmax_t) spectra.n_cols; ++i)
+#else
+  #pragma omp parallel for default(none) \
+      shared(spectra, metric, distances)
+  for (size_t i = 0; i < spectra.n_cols; ++i)
+#endif
+    {
+        arma::vec spectrum = spectra.col(i);
+        distances(i) = metric.Evaluate(center, spectrum);
+    }
+    index = distances.index_min();
+    return spectra.col(index);
+}
+
+///
+/// \brief Vespucci::Math::Intersection
+/// \param x
+/// \param y
+/// \return
+/// Find the intersection between two sets of indices (the values in common between the two).
+arma::uvec Vespucci::Math::Intersection(arma::uvec &x, arma::uvec &y)
+{
+    std::vector<arma::uword> intersection;
+    std::sort(x.begin(), x.end());
+    std::sort(y.begin(), y.end());
+    std::set_intersection(x.begin(), x.end(),
+                          y.begin(), y.end(),
+                          std::back_inserter(intersection));
+    return arma::conv_to<arma::uvec>::from(intersection);
 }

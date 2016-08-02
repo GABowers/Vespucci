@@ -73,7 +73,10 @@ namespace Vespucci
         VESPUCCI_EXPORT arma::umat GetClosestValues(arma::vec query, arma::vec target, const arma::uword k=5);
 
         VESPUCCI_EXPORT double CalcPoly(const double x, const arma::vec &coefs);
-\
+
+        VESPUCCI_EXPORT arma::vec RepresentativeSpectrum(const arma::mat &spectra, arma::uword &index, std::string metric_name="euclidean", std::string center="centroid");
+
+
         //Abscissa transforms
         VESPUCCI_EXPORT arma::vec WavelengthToFrequency(const arma::vec &x, double freq_factor, double wl_factor);
         VESPUCCI_EXPORT arma::vec FrequencyToWavelength(const arma::vec &x, double wl_factor, double freq_factor);
@@ -97,6 +100,8 @@ namespace Vespucci
         VESPUCCI_EXPORT arma::cx_vec cx_zeros(arma::uword n);
         VESPUCCI_EXPORT arma::cx_mat cx_zeros(arma::uword m, arma::uword n);
 
+        VESPUCCI_EXPORT arma::uword ClosestIndex(double value, const arma::vec &vector);
+        VESPUCCI_EXPORT arma::uvec Intersection(arma::uvec &x, arma::uvec &y);
     }
 }
 

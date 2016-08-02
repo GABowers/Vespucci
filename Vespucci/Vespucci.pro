@@ -18,36 +18,23 @@
 ################################################################################
 ##############                Vespucci Qt Profile                 ##############
 ################################################################################
-# The configuration for windows assumes that you have downloaded the compiled
-# windows libraries from the MinGW_libs branch of the Vespucci repository.
-# To use these libraries, you must be using 64-bit MinGW-w64 toolkit, with SEH
-# for exception handling. All libraries must be compiled in such a manner.
-# A link to download the exact compiler build I used is available on the GitHub
-# page.
-# R- and Octave-related libraries will be based on your installation of those
-# tools.
+#This profile is based on what the Vespucci Project uses for continous integration
+#Travis-CI for macOS and Linux, Appveyor for Windows.
+#On Windows, all prerequisites except Qt and Boost are built and provided on github
+#in the VespucciProject/Vespucci_dependencies project
+#On macOS and Linux, only armadillo and mlpack are built and provided in the same place.
+#On macOS, all other prerequisites are installed and linked using homebrew
+#On Linux, all other prerequisites are installed using apt (Ubuntu 14.04 LTS)
 
-
-# Configuration settings for unix systems are based on my own personal environment
-# Default install paths for armadillo and mlpack (from make install).
-# Others based on Ubuntu 15.04 package manager install directories
-# Libvespucci should be built and linked.
-# Vespucci-QCP should be checked out, built and linked.
 QT       += core gui
 QT       += widgets printsupport
 QT       += svg
 CONFIG   += static debug_and_release
-mac: CONFIG += app_bundle
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
-
-mac: ICON = vespuccilogo.icns
 
 # Set the installation directory
 isEmpty(PREFIX) {
     PREFIX = $$PWD/../../Vespucci-install
 }
-travis_ci = $$(TRAVIS_CI)
-deploy_win64 = $$(DEPLOY_WIN64)
 
 # it is assumed that casual windows users will not use the build system to install
 mac: TARGET = Vespucci #Vespucci.app (which can be installed in Applications) for mac.
@@ -93,17 +80,7 @@ mac: QMAKE_CXXFLAGS =  -mmacosx-version-min=10.7 \
                         -isystem $$PWD/../../Vespucci-QCP-sharedlib/include \
                         -isystem /usr/local/Cellar/qt5/5.5.0/lib/QtPrintSupport.framework/Headers/QtPrintSupport \
                         -DARMA_DONT_USE_WRAPPER
-mac: LIBS += -L/usr/lib -lc++
 
-win32-g++: QMAKE_CXXFLAGS += -std=gnu++11 \
-                         -pthread \
-                         -isystem "C:/Projects/Vespucci/MinGW_libs/include" \
-                         -isystem "C:/Projects/Vespucci/MinGW_libs/boost/boost" \
-                         -isystem "C:/Projects/Vespucci/MinGW_libs/include/armadillo_bits" \
-                         -isystem "C:/Projects/Vespucci/MinGW_libs/include/mlpack" \
-                         -isystem "C:/Tools/R/R-3.1.3/include" \
-                         -isystem "C:/Tools/R/R-3.1.3/library/Rcpp/include" \
-                         -isystem "C:/Tools/R/R-3.1.3/library/RcppArmadillo/include/armadillo_bits"
 
 
 
@@ -125,11 +102,9 @@ SOURCES += main.cpp\
     GUI/Processing/booleanizedialog.cpp \
     GUI/Display/citationdialog.cpp \
     GUI/Processing/cropdialog.cpp \
-    GUI/Processing/dataextractordialog.cpp \
     GUI/Display/dataviewer.cpp \
     GUI/Processing/filterdialog.cpp \
     GUI/Analysis/kmeansdialog.cpp \
-    GUI/Processing/loaddataset.cpp \
     GUI/QAbstractItemModel/maplistmodel.cpp \
     GUI/Display/mapviewer.cpp \
     GUI/Processing/metadatasetdialog.cpp \
@@ -139,8 +114,6 @@ SOURCES += main.cpp\
     GUI/Processing/rangedialog.cpp \
     GUI/Display/scalebardialog.cpp \
     GUI/QAbstractItemModel/spectratablemodel.cpp \
-    GUI/Display/spectrumselectiondialog.cpp \
-    GUI/Display/spectrumviewer.cpp \
     GUI/Display/statsdialog.cpp \
     GUI/Processing/thresholddialog.cpp \
     GUI/Analysis/univariatedialog.cpp \
@@ -159,7 +132,6 @@ SOURCES += main.cpp\
     GUI/Processing/abscissainterpolationdialog.cpp \
     GUI/Processing/stitchimportdialog.cpp \
     Global/global.cpp \
-    #External/interprocesssender.cpp \
     External/fileinterprocess.cpp \
     GUI/QAbstractItemModel/datasettreemodel.cpp \
     GUI/QAbstractItemModel/treeitem.cpp \
@@ -174,7 +146,16 @@ SOURCES += main.cpp\
     Global/datamodel.cpp \
     GUI/QAbstractItemModel/datasetlistmodel.cpp \
     GUI/pythonshelldialog.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    Data/Analysis/multianalyzer.cpp \
+    GUI/Analysis/multianalysisdialog.cpp \
+    GUI/Analysis/hypothesistestdialog.cpp \
+    GUI/Display/mapplot.cpp \
+    GUI/Display/globalgradientdialog.cpp \
+    GUI/Display/colorrangedialog.cpp \
+    GUI/Display/spectrumeditor.cpp \
+    GUI/Processing/datasetimportdialog.cpp \
+    GUI/Processing/matrixselectiondialog.cpp
 
 HEADERS  += \
     GUI/mainwindow.h \
@@ -192,13 +173,11 @@ HEADERS  += \
     GUI/Processing/baselinedialog.h \
     GUI/Processing/booleanizedialog.h \
     GUI/Processing/cropdialog.h \
-    GUI/Processing/dataextractordialog.h \
     GUI/Display/aboutdialog.h \
     GUI/Display/citationdialog.h \
     GUI/Display/dataviewer.h \
     GUI/Processing/filterdialog.h \
     GUI/Analysis/kmeansdialog.h \
-    GUI/Processing/loaddataset.h \
     GUI/QAbstractItemModel/maplistmodel.h \
     GUI/Display/mapviewer.h \
     GUI/Processing/metadatasetdialog.h \
@@ -207,8 +186,6 @@ HEADERS  += \
     GUI/Processing/rangedialog.h \
     GUI/Display/scalebardialog.h \
     GUI/QAbstractItemModel/spectratablemodel.h \
-    GUI/Display/spectrumselectiondialog.h \
-    GUI/Display/spectrumviewer.h \
     GUI/Display/statsdialog.h \
     GUI/Processing/thresholddialog.h \
     GUI/Analysis/univariatedialog.h \
@@ -228,7 +205,6 @@ HEADERS  += \
     GUI/Processing/abscissainterpolationdialog.h \
     GUI/Processing/stitchimportdialog.h \
     Global/global.h \
-    ##External/interprocesssender.h \
     External/fileinterprocess.h \
     GUI/QAbstractItemModel/datasettreemodel.h \
     GUI/QAbstractItemModel/treeitem.h \
@@ -243,7 +219,16 @@ HEADERS  += \
     Global/datamodel.h \
     GUI/QAbstractItemModel/datasetlistmodel.h \
     GUI/pythonshelldialog.h \
-    qcustomplot.h
+    qcustomplot.h \
+    Data/Analysis/multianalyzer.h \
+    GUI/Analysis/multianalysisdialog.h \
+    GUI/Analysis/hypothesistestdialog.h \
+    GUI/Display/mapplot.h \
+    GUI/Display/globalgradientdialog.h \
+    GUI/Display/colorrangedialog.h \
+    GUI/Display/spectrumeditor.h \
+    GUI/Processing/datasetimportdialog.h \
+    GUI/Processing/matrixselectiondialog.h
 
 
 FORMS    += \
@@ -254,11 +239,9 @@ FORMS    += \
     GUI/Processing/baselinedialog.ui \
     GUI/Display/citationdialog.ui \
     GUI/Processing/cropdialog.ui \
-    GUI/Processing/dataextractordialog.ui \
     GUI/Display/dataviewer.ui \
     GUI/Processing/filterdialog.ui \
     GUI/Analysis/kmeansdialog.ui \
-    GUI/Processing/loaddataset.ui \
     GUI/Display/mapviewer.ui \
     GUI/Processing/metadatasetdialog.ui \
     GUI/Analysis/plotmakerdialog.ui \
@@ -266,8 +249,6 @@ FORMS    += \
     GUI/Analysis/principalcomponentsdialog.ui \
     GUI/Processing/rangedialog.ui \
     GUI/Display/scalebardialog.ui \
-    GUI/Display/spectrumselectiondialog.ui \
-    GUI/Display/spectrumviewer.ui \
     GUI/Display/statsdialog.ui \
     GUI/Processing/thresholddialog.ui \
     GUI/Analysis/vcadialog.ui \
@@ -290,142 +271,132 @@ FORMS    += \
     GUI/Display/datawidget.ui \
     GUI/Display/plotwidget.ui \
     GUI/macrodialog.ui \
-    GUI/pythonshelldialog.ui
+    GUI/pythonshelldialog.ui \
+    GUI/Analysis/multianalysisdialog.ui \
+    GUI/Analysis/hypothesistestdialog.ui \
+    GUI/Display/globalgradientdialog.ui \
+    GUI/Display/colorrangedialog.ui \
+    GUI/Display/spectrumeditor.ui \
+    GUI/Processing/datasetimportdialog.ui \
+    GUI/Processing/matrixselectiondialog.ui
 
 RESOURCES += \
     resources.qrc
-
-RC_ICONS = "vespuccilogo.ico"
-
-
-#linux libraries, specific to my own install. This will be handled by CMake later
-#I hope...
-
-#linux and mac osx libraries, specific to my own install. This will be handled by CMake later
-#I hope...
-#For these paths to work, everything except for armadillo, mlpack and cminpack
-#should be installed using the package manager for your distribution
-# (these work for ubuntu and for the homebrew mac os package manager).
-# include paths a
-unix:!macx: INCLUDEPATH += /usr/include
-unix:!macx: DEPENDPATH += /usr/include
-unix:!macx: INCLUDEPATH += /usr/local/include
-unix:!macx: DEPENDPATH += /usr/local/include
-unix:macx: INCLUDEPATH += /usr/local/opt/libxml2/include/libxml2
-unix:macx: DEPENDPATH += /usr/local/opt/libxml2/include/libxml2
 
 #for inclusion of LibVespucci headers
 INCLUDEPATH += $$PWD/../VespucciLibrary/include
 DEPENDPATH += $$PWD/../VespucciLibrary/include
 
-count(travis_ci, 1){
-  unix:!macx: QMAKE_CXX=/usr/bin/g++-4.9
-  unix:!macx: LIBS += -L/home/travis/depts/lib -lmlpack
-  unix:!macx: LIBS += -L/home/travis/depts/lib -larmadillo
-  unix:!macx: LIBS += -L/usr/lib -larpack
-  unix:!macx: PRE_TARGETDEPS += /usr/lib/libarpack.a
-  unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu -lhdf5
-  unix:!macx: PRE_TARGETDEPS += /usr/lib/x86_64-linux-gnu/libhdf5.a
-  unix:!macx: LIBS += -L/usr/lib -lcminpack
-  unix:!macx: LIBS += -L/usr/lib -lblas
-  unix:!macx: LIBS += -L/usr/lib -llapack
-  unix:!macx: LIBS += -L/home/travis/depts/lib -lqcustomplot
-  unix:!macx: LIBS += -L/home/travis/build/VespucciProject/Vespucci/build-VespucciLibrary -lvespucci
-  unix:!macx: INCLUDEPATH += /home/travis/depts/include
-  unix:!macx: DEPENDPATH += /home/travis/depts/include
-  unix:!macx: INCLUDEPATH += /home/travis/depts/include/armadillo_bits
-  unix:!macx: DEPENDPATH += /home/travis/depts/include/armadillo_bits
+unix:!macx{
+    QMAKE_CXX=/usr/bin/g++-4.9
+    CONFIG += c++11
+    QMAKE_CXXFLAGS += -fext-numeric-literals
+    LIBS += -L$$PWD/../../mlpack/lib -lmlpack
+    LIBS += -L$$PWD/../../armadillo/lib -larmadillo
+    LIBS += -L/usr/lib -larpack
+    PRE_TARGETDEPS += /usr/lib/libarpack.a
+    LIBS += -L/usr/lib/x86_64-linux-gnu -lhdf5
+    LIBS += -L/usr/lib/x86_64-linux-gnu -lhdf5_cpp
+    PRE_TARGETDEPS += /usr/lib/x86_64-linux-gnu/libhdf5.a
+    PRE_TARGETDEPS += /usr/lib/x86_64-linux-gnu/libhdf5_cpp.a
+    LIBS += -L/usr/lib -lblas
+    LIBS += -L/usr/lib -llapack
+
+    LIBS += -L$$PWD/../../yaml-cpp/lib -lyaml-cpp
+    PRE_TARGETDEPS += $$PWD/../../yaml-cpp/lib/libyaml-cpp.a
+    LIBS += -L$$PWD/../../quazip/lib -lquazip
+    PRE_TARGETDEPS += $$PWD/../../quazip/lib/libquazip.a
+
+    LIBS += -L$$OUT_PWD/../VespucciLibrary -lvespucci
+
+    LIBS += -L/usr/lib/x86_64-linux-gnu/ -lz
+    PRE_TARGETDEPS += /usr/lib/x86_64-linux-gnu/libz.a
+
+    INCLUDEPATH += /usr/include
+    DEPENDPATH += /usr/include
+
+    INCLUDEPATH += /usr/include/libxml2
+    DEPENDPATH += /usr/include/libxml2
+
+    INCLUDEPATH += /usr/local/include
+    DEPENDPATH += /usr/local/include
+
+    INCLUDEPATH += $$PWD/../../mlpack/include
+    DEPENDPATH += $$PWD/../../mlpack/include
+
+    INCLUDEPATH += $$PWD/../../armadillo/include
+    DEPENDPATH += $$PWD/../../armadillo/include
+
+    INCLUDEPATH += $$PWD/../../quazip/include
+    DEPENDPATH += $$PWD/../../quazip/include
+
+    INCLUDEPATH += $$PWD/../../yaml-cpp/include
+    DEPENDPATH += $$PWD/../../yaml-cpp/include
+
 }
-count(travis_ci, 0){
-    unix:!macx: LIBS += -L/usr/local/lib -lmlpack
-    unix:!macx: LIBS += -L/usr/lib -larmadillo
-    unix:!macx: LIBS += -L/usr/local/lib -larpack
-    unix:!macx: PRE_TARGETDEPS += /usr/local/lib/libarpack.a
-    unix:!macx: LIBS += -L/usr/local/lib -lhdf5
-    unix:!macx: PRE_TARGETDEPS += /usr/local/lib/libhdf5.a
-    unix:!macx: LIBS += -L/usr/local/lib64/ -lcminpack
-    unix:!macx: PRE_TARGETDEPS += /usr/local/lib64/libcminpack.a
-    unix:!macx: LIBS += -L/usr/lib -lopenblas
-    unix:!macx: PRE_TARGETDEPS += /usr/lib/libopenblas.a
-    unix:!macx: LIBS += -L/usr/local/lib64/ -lcminpack
-    unix:!macx: PRE_TARGETDEPS += /usr/local/lib64/libcminpack.a
-    unix:!macx: INCLUDEPATH += /usr/local/include/cminpack-1
-    unix:!macx: DEPENDPATH += /usr/local/include/cminpack-1
-    INCLUDEPATH += $$PWD/../Vespucci-QCP-sharedlib/include
-    DEPENDPATH += $$PWD/../Vespucci-QCP-sharedlib/include
-    unix:!macx: CONFIG(release, debug|release): LIBS += -L$$PWD/../Vespucci-QCP/lib/ -lqcustomplot
-    else:unix:!macx: CONFIG(debug, debug|release): LIBS += -L$$PWD/../Vespucci-QCP/lib/ -lqcustomplotd
-    unix:!macx:CONFIG(release, debug|release): LIBS += -L$$PWD/../build-VespucciLibrary/release -lvespucci
-    else:unix:!macx:CONFIG(debug, debug|release): LIBS += -L$$PWD/../build-VespucciLibrary/debug -lvespucci
-}
-
-
-unix:!macx: INCLUDEPATH += /usr/include
-unix:!macx: DEPENDPATH += /usr/include
-
-unix:!macx: INCLUDEPATH += /usr/include/libxml2
-unix:!macx: DEPENDPATH += /usr/include/libxml2
-
-unix:!macx: INCLUDEPATH += /usr/include
-unix:!macx: DEPENDPATH += /usr/include
-unix:!macx: INCLUDEPATH += /usr/local/include
-unix:!macx: DEPENDPATH += /usr/local/include
-unix:!macx: INCLUDEPATH += /usr/local/include/cminpack-1
-unix:!macx: DEPENDPATH += /usr/local/include/cminpack-1
-
-
-#we will no longer support MinGW-w64 for Windows. Users who want to use it will have to
-#reckon the config themselves
-
-#MSVC for deployment (used for build using static qt and all libraries compiled in msvc linked statically)
-
 
 #mac libraries. These are the same in Travis-CI as in most local environments
 #with all dependencies of armadillo and mlpack installed using homebrew
-macx: LIBS += -L$$OUT_PWD/../VespucciLibrary/ -lvespucci
-
-mac: LIBS += -L$$PWD/../../mlpack/lib/ -lmlpack
-mac: INCLUDEPATH += $$PWD/../../mlpack/include
-mac: DEPENDPATH += $$PWD/../../mlpack/include
-
-mac: LIBS += -L$$PWD/../../armadillo/lib/ -larmadillo
-mac: INCLUDEPATH += $$PWD/../../armadillo/include
-mac: DEPENDPATH += $$PWD/../../armadillo/include
-
-mac: LIBS += -L/usr/local/lib/ -larpack
-mac: INCLUDEPATH += /usr/local/include
-mac: DEPENDPATH += /usr/local/include
-
-mac: LIBS += -framework Accelerate
-
-macx: LIBS += -L/usr/local/lib/ -lhdf5
-macx: PRE_TARGETDEPS += /usr/local/lib/libhdf5.a
-
-mac: LIBS += -F$$PWD/../../Vespucci-QCP/lib/ -framework QCustomPlot
-mac: INCLUDEPATH += $$PWD/../../Vespucci-QCP/include
-mac: DEPENDPATH += $$PWD/../../Vespucci-QCP/include
-
-macx: LIBS += -L$$PWD/../../quazip/lib/ -lquazip
-INCLUDEPATH += $$PWD/../../quazip/include
-DEPENDPATH += $$PWD/../../quazip/include
-macx: PRE_TARGETDEPS += $$PWD/../../quazip/lib/libquazip.a
+#and armadillo and mlpack installed to the ../armadillo and ../mlpack directories
+macx{
+    CONFIG += app_bundle
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
+    QMAKE_CXXFLAGS += --system-header-prefix=/usr \
+                      --system-header-prefix=$$PWD/../../armadillo \
+                      --system-header-prefix=$$PWD/../../mlpack \
+                      --system-header-prefix=$$PWD/../../yaml-cpp \
+                      --system-header-prefix=$$PWD/../../quazip
 
 
-macx: LIBS += -L$$PWD/../../yaml-cpp/lib/ -lyaml-cpp
-INCLUDEPATH += $$PWD/../../yaml-cpp/include
-DEPENDPATH += $$PWD/../../yaml-cpp/include
-macx: PRE_TARGETDEPS += $$PWD/../../yaml-cpp/lib/libyaml-cpp.a
+    ICON = $$PWD/vespuccilogo.icns
+    LIBS += -L/usr/lib -lc++
 
-macx: LIBS += -lz.1
+    LIBS += -L$$OUT_PWD/../VespucciLibrary/ -lvespucci
+    LIBS += -L$$PWD/../../mlpack/lib/ -lmlpack
+    INCLUDEPATH += $$PWD/../../mlpack/include
+    DEPENDPATH += $$PWD/../../mlpack/include
 
+    LIBS += -L$$PWD/../../armadillo/lib/ -larmadillo
+    INCLUDEPATH += $$PWD/../../armadillo/include
+    DEPENDPATH += $$PWD/../../armadillo/include
+
+    LIBS += -L/usr/local/lib/ -larpack
+    INCLUDEPATH += /usr/local/include
+    DEPENDPATH += /usr/local/include
+
+    LIBS += -framework Accelerate
+
+    LIBS += -L/usr/local/lib/ -lhdf5
+    PRE_TARGETDEPS += /usr/local/lib/libhdf5.a
+
+    LIBS += -L/usr/local/lib/ -lhdf5_cpp
+    PRE_TARGETDEPS += /usr/local/lib/libhdf5_cpp.a
+
+    LIBS += -L/usr/local/lib -lhdf5
+
+    LIBS += -L$$PWD/../../quazip/lib/ -lquazip
+    INCLUDEPATH += $$PWD/../../quazip/include
+    DEPENDPATH += $$PWD/../../quazip/include
+    PRE_TARGETDEPS += $$PWD/../../quazip/lib/libquazip.a
+
+    LIBS += -L$$PWD/../../yaml-cpp/lib/ -lyaml-cpp
+    INCLUDEPATH += $$PWD/../../yaml-cpp/include
+    DEPENDPATH += $$PWD/../../yaml-cpp/include
+    PRE_TARGETDEPS += $$PWD/../../yaml-cpp/lib/libyaml-cpp.a
+
+    LIBS += -lz.1
+
+    INCLUDEPATH += /usr/local/opt/libxml2/include/libxml2
+    DEPENDPATH += /usr/local/opt/libxml2/include/libxml2
+}
 
 #windows libraries for msvc (we don't currently build the libraries for g++ on windows)
-
 win32:!win32-g++{
     CONFIG += release force_debug_info
+    QMAKE_CXXFLAGS += /MP /openmp
 
     LIBS += -L$$OUT_PWD/../VespucciLibrary/release -llibvespucci
-    PRE_TARGETDEPS += $$OUT_PWD/../VespucciLibrary/release/vespucci.lib
+    PRE_TARGETDEPS += $$OUT_PWD/../VespucciLibrary/release/libvespucci.lib
 
     LIBS += -L$$PWD/../../Vespucci_dependencies/mlpack/lib/ -lmlpack
     INCLUDEPATH += $$PWD/../../Vespucci_dependencies/mlpack/include
@@ -444,10 +415,11 @@ win32:!win32-g++{
     PRE_TARGETDEPS += $$PWD/../../Vespucci_dependencies/LAPACK/lapack_x64.lib
 
     LIBS += -L$$PWD/../../Vespucci_dependencies/HDF5/lib/ -lhdf5
+    LIBS += -L$$PWD/../../Vespucci_dependencies/HDF5/lib/ -lhdf5_cpp
     INCLUDEPATH += $$PWD/../../Vespucci_dependencies/HDF5/include
     DEPENDPATH += $$PWD/../../Vespucci_dependencies/HDF5/include
     PRE_TARGETDEPS += $$PWD/../../Vespucci_dependencies/HDF5/lib/hdf5.lib
-
+    PRE_TARGETDEPS += $$PWD/../../Vespucci_dependencies/HDF5/lib/hdf5_cpp.lib
 
     INCLUDEPATH += $$PWD/../../Vespucci_dependencies/boost_1_61_0
     DEPENDPATH += $$PWD/../../Vespucci_dependencies/boost_1_61_0
@@ -481,6 +453,8 @@ win32:!win32-g++{
     INCLUDEPATH += $$PWD/../../Vespucci_dependencies/HDF5/include
     DEPENDPATH += $$PWD/../../Vespucci_dependencies/HDF5/include
     PRE_TARGETDEPS += $$PWD/../../Vespucci_dependencies/HDF5/lib/zlib.lib
+
+    RC_ICONS=$$PWD/vespuccilogo.ico
 }
 
 

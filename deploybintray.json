@@ -1,0 +1,18 @@
+{
+    "package": {
+        "name": "Vespucci_latest",
+        "repo": "Vespucci_automated_builds",
+        "subject": "vespucciproject"
+    },
+
+    "version": {
+        "name": "1.0.0"
+    },
+
+    "files":
+        [
+        {"includePattern": "${TRAVIS_BUILD_DIR/package/(.*)", "uploadPattern":"/$1"}
+        ],
+    
+    "publish":"true"
+}
